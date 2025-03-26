@@ -1,29 +1,46 @@
 import { Component, inject } from '@angular/core';
-import { FormControl,FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { LoginService } from './login.service';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrls: ['./login.component.css'],
+  standalone: true,
+  imports: [ReactiveFormsModule]
 })
 export class LoginComponent {
 
-  // userForm:FormGroup=new FormGroup({
-  //   username:new FormControl(""),
-  //   password:new FormControl("")
-  // });
-userName:FormControl=new FormControl("");
-password:FormControl=new FormControl("");
-router=inject(Router);
-  onlogIn(){
-    debugger;
-     if(this.userName.value=='admin'&& this.password.value=='1234'){
-  this.router.navigateByUrl('dashboard');
-     }
-     else{
-      alert('wrong credentials');
-     }
+  loginService = inject(LoginService);
+  router = inject(Router);
+
+  loginForm = new FormGroup({
+    userName: new FormControl(''),
+    password: new FormControl('')
+  });
+
+  onLogin() {
+    if (this.loginForm.valid) {
+      const userName = this.loginForm.get('userName')?.value ?? '';  // Ensure it's a string
+      const password = this.loginForm.get('password')?.value ?? '';
+  
+      this.loginService.logIn(userName, password).subscribe({
+        next: (res: any) => {
+          if (res?.statusCode === 200) {
+            localStorage.setItem('token', res.data);
+            this.router.navigateByUrl('/dashboard'); // Redirect after login
+          } else {
+            alert(res.data || 'Invalid credentials');
+          }
+        },
+        error: () => {
+          alert('Login failed. Please try again.');
+        }
+      });
+    } else {
+      alert('Please fill in all fields.');
+    }
   }
+  
 }
