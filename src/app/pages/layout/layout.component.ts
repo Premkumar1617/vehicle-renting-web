@@ -1,5 +1,6 @@
 import { Component,ElementRef,inject, ViewChild } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
+import { Router } from '@angular/router';
 
 import { MasterService } from '../../services/master.service';
 
@@ -12,7 +13,7 @@ import { MasterService } from '../../services/master.service';
 export class LayoutComponent {
 @ViewChild("searchText") searchText:ElementRef | undefined  
 masterService=inject(MasterService);
-  constructor(){
+  constructor(private routr:Router){
     this.masterService.searchString.subscribe((res:any)=>{
       if(res==''){
         if (this.searchText && this.searchText.nativeElement) {
@@ -20,6 +21,10 @@ masterService=inject(MasterService);
         }
       }
     });
+  }
+  onlogoutclick(){
+    localStorage.removeItem('token');
+    this.routr.navigate(['']);
   }
 onchange(event:any)
   {
